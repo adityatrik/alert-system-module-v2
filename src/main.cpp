@@ -23,7 +23,7 @@
 #endif
 
 #define EEPROM_SIZE 1024
-#define STATIC
+// #define STATIC
 
 String pubTopic = "alert/device/";
 String subTopic = "alert/server/";
@@ -78,7 +78,7 @@ int
 
 int
     IP_ARR[5] = {192, 168, 100, 103},
-    ADDR_IP_ARR[5] = {0, 2, 4, 5},
+    ADDR_IP_ARR[5] = {0, 1, 2, 3},
     NETMASK_ARR[5] = {255, 255, 255, 0},
     ADDR_NETMASK_ARR[5] = {4, 5, 6, 7},
     GATEWAY_ARR[5] = {192, 168, 100, 1},
@@ -184,6 +184,8 @@ void reconnect()
           Serial.println(ssid);
           Serial.print("IP address: ");
           Serial.println(WiFi.localIP());
+          client.setServer(mqtt_server, 1883);
+          client.setCallback(callback);
         }
       }
       // Wait 5 seconds before retrying
@@ -892,7 +894,7 @@ void setup()
 
   // ============================ WRITE MEMORY MANUAL ============================ //
   // EEPROM.write(ADDR_IP_ARR[2], 100);
-  // EEPROM.write(ADDR_IP_ARR[3], 161);
+  // EEPROM.write(ADDR_IP_ARR[3], 231);
   // EEPROM.write(ADDR_NETMASK_ARR[2], 255);
   // EEPROM.write(ADDR_NETMASK_ARR[3], 0);
   // EEPROM.write(ADDR_GATEWAY_ARR[1], 168);
@@ -945,7 +947,7 @@ void setup()
       break;
     }
     // ======================= DEBUG ========================== //
-    // Serial.println(IP_ARR[i]);
+    Serial.println(IP_ARR[i]);
   }
   // MEMORY READING NETMASK
   for (byte i = 0; i < 4; i++)
@@ -968,10 +970,11 @@ void setup()
       }
       break;
     case 2:
-      if (!(255 >= NETMASK_ARR[2] >= 0))
+      if ((NETMASK_ARR[2] != 255) || (NETMASK_ARR[2] != 0))
       {
         NETMASK_ARR[2] = 255;
         EEPROM.write(ADDR_NETMASK_ARR[2], NETMASK_ARR[2]);
+        EEPROM.commit();
       }
       break;
     case 3:
@@ -986,7 +989,7 @@ void setup()
       break;
     }
     // ======================= DEBUG ========================== //
-    // Serial.println(NETMASK_ARR[i]);
+    Serial.println(NETMASK_ARR[i]);
   }
   // MEMORY READING GATEWAY
   for (byte i = 0; i < 4; i++)
@@ -1028,7 +1031,7 @@ void setup()
       break;
     }
     // ======================= DEBUG ========================== //
-    // Serial.println(GATEWAY_ARR[i]);
+    Serial.println(GATEWAY_ARR[i]);
   }
   // MEMORY READING DNS
   for (byte i = 0; i < 4; i++)
@@ -1062,7 +1065,7 @@ void setup()
       if (DNS_ARR[3] == 255)
       {
         DNS_ARR[3] = 1;
-        EEPROM.write(ADDR_NETMASK_ARR[3], DNS_ARR[3]);
+        EEPROM.write(ADDR_DNS_ARR[3], DNS_ARR[3]);
         EEPROM.commit();
       }
       break;
@@ -1084,14 +1087,15 @@ void setup()
 
   eth.setDefault(); // use ethernet for default route
 
-#ifdef STATIC
+  // #ifdef STATIC
   IPAddress IP(IP_ARR[0], IP_ARR[1], IP_ARR[2], IP_ARR[3]);
   IPAddress NETMASK(NETMASK_ARR[0], NETMASK_ARR[1], NETMASK_ARR[2], NETMASK_ARR[3]);
   IPAddress GATEWAY(GATEWAY_ARR[0], GATEWAY_ARR[1], GATEWAY_ARR[2], GATEWAY_ARR[3]);
   IPAddress DNS(DNS_ARR[0], DNS_ARR[1], DNS_ARR[2], DNS_ARR[3]);
-  eth.config(IP, GATEWAY, NETMASK, DNS, DNS);
-#endif
+  // eth.config(IP, GATEWAY, NETMASK);
+  // #endif
   int present = eth.begin(mac);
+  // eth.end();
   if (!present)
   {
     Serial.println("no ethernet hardware present");
@@ -1102,6 +1106,7 @@ void setup()
       {
         break;
       }
+      delay(1000);
     }
   }
   if (TIMEOUT_ETHERNET < 21)
@@ -1111,15 +1116,32 @@ void setup()
     while (!eth.connected())
     {
       Serial.print(".");
+      TIMEOUT_ETHERNET++;
+      if (TIMEOUT_ETHERNET > 20)
+      {
+        ETH_MODE = false;
+        Serial.println("Ethernet Tidak Terhubung !!");
+        Serial.println("Mencoba Menghubungkan Melalui WiFi ...");
+        break;
+      }
       delay(1000);
     }
-    Serial.println();
-    Serial.print("Ethernet ip address: ");
-    Serial.println(eth.localIP());
-    Serial.print("Ethernet subnetMask: ");
-    Serial.println(eth.subnetMask());
-    Serial.print("Ethernet gateway: ");
-    Serial.println(eth.gatewayIP());
+    if (ETH_MODE)
+    {
+      Serial.println();
+      Serial.print("Ethernet ip address: ");
+      Serial.println(eth.localIP());
+      Serial.print("Ethernet subnetMask: ");
+      Serial.println(eth.subnetMask());
+      Serial.print("Ethernet gateway: ");
+      Serial.println(eth.gatewayIP());
+      client.setServer(mqtt_server, 1883);
+      client.setCallback(callback);
+      if (!client.connected())
+      {
+        reconnect();
+      }
+    }
   }
   else
   {
@@ -1127,18 +1149,11 @@ void setup()
     Serial.println("Mencoba Menghubungkan Melalui WiFi ...");
   }
 
-  client.setServer(mqtt_server, 1883);
-  client.setCallback(callback);
-  if (!client.connected())
+  if (!ETH_MODE)
   {
-    reconnect();
-  }
-
-  if (TIMEOUT_ETHERNET > 20)
-  {
+    WiFi.config(IP, GATEWAY, NETMASK, DNS);
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
-    WiFi.config(IP, GATEWAY, NETMASK, DNS);
     Serial.println("");
 
     while (WiFi.status() != WL_CONNECTED)
@@ -1153,6 +1168,8 @@ void setup()
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
     WIFI_ON_SETUP = true;
+    client.setServer(mqtt_server, 1883);
+    client.setCallback(callback);
     reconnect();
   }
 
