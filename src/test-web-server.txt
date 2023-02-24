@@ -1,0 +1,62 @@
+#include <ESP8266WiFi.h>
+#include <WiFiClient.h>
+#include <ESP8266WebServer.h>
+#include <DNSServer.h>
+#include <index.h>
+
+const char* ssid = "LAUNDRY KURNIA";
+const char* password = "HARTOYO130606";
+
+ESP8266WebServer server(80);
+
+const int pinLED = LED_BUILTIN;
+
+void HOMEPAGE(){
+  String page = FPSTR(MAIN_PAGE);
+  server.send(200, "text/html", page);
+}
+
+void onLED(){
+  digitalWrite(pinLED, LOW);
+  String page = FPSTR(MAIN_PAGE);
+  server.send(200, "text/html", "ON");
+}
+
+void offLED(){
+  digitalWrite(pinLED, HIGH);
+  String page = FPSTR(MAIN_PAGE);
+  server.send(200, "text/html", "OFF");
+}
+
+void setup() {
+  pinMode(pinLED, OUTPUT);
+  Serial.begin(9600);
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid,password);
+  Serial.println("");
+
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.println("Connecting To Network ...");
+  }
+
+  Serial.println("");
+  Serial.print("Connected to ");
+  Serial.println(ssid);
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  server.on("/", HOMEPAGE);
+  server.on("/on", onLED);
+  server.on("/off", offLED);
+  server.begin();
+  
+
+}
+
+void loop() {
+  server.handleClient();
+  // put your main code here, to run repeatedly:
+
+}

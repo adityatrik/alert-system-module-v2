@@ -1,3 +1,8 @@
+//=========================================
+//HTML + CSS + JavaScript codes for webpage
+//=========================================
+const char LOGIN_PAGE[] =
+R"=====(
 <!DOCTYPE html>
 <html>
   <head>
@@ -116,10 +121,32 @@
   </head>
   <body>
     <div class="login-container"  action='/login' method='POST'>
-      <h1 style="color:#45a049;text-align: center;">ALERT SYSTEM MODULE</h1>
-      <a href="/wifi"><button type="submit" class="form-submit">Konfigurasi WiFi</button></a>      
-      <a href="/ethernet"><button type="submit" class="form-submit">Konfigurasi Ethernet</button></a>      
-      <a href="/login"><button type="submit" class="form-submit">Logout</button></a>      
+      <form class="login-form">
+        <h1 style="color:#45a049;text-align: center;">ALERT SYSTEM MODULE</h1>
+        <h3 style="text-align: center;">ID:ASM2301001</h3>
+        <div class="form-group">
+          <label class="form-label" for="username">Username</label>
+          <input
+            type="text"
+            name='USERNAME'
+            class="form-control"
+            id="username"
+            placeholder="Masukkan username"
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input
+            type="password"
+            name='PASSWORD'
+            class="form-control"
+            id="password"
+            placeholder="Masukkan password"
+          />
+        </div>
+        <button type="submit" name='SUBMIT' class="form-submit">Login</button>
+      </form>
     </div>
   </body>
 </html>
+)=====";

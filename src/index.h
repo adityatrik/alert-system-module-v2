@@ -1,3 +1,8 @@
+//=========================================
+//HTML + CSS + JavaScript codes for webpage
+//=========================================
+const char MAIN_PAGE[] =
+R"=====(
 <!DOCTYPE html>
 <html>
   <head>
@@ -117,9 +122,12 @@
   <body>
     <div class="login-container"  action='/login' method='POST'>
       <h1 style="color:#45a049;text-align: center;">ALERT SYSTEM MODULE</h1>
-      <a href="/wifi"><button type="submit" class="form-submit">Konfigurasi WiFi</button></a>      
-      <a href="/ethernet"><button type="submit" class="form-submit">Konfigurasi Ethernet</button></a>      
+      <h3 style="text-align: center;">ID:ASM2301002</h3>
+      <a href="/wifi"><button type="submit" class="form-submit">Konfigurasi Jaringan</button></a>            
+      <a href="/mqtt"><button type="submit" class="form-submit">Konfigurasi MQTT</button></a>      
       <a href="/login"><button type="submit" class="form-submit">Logout</button></a>      
     </div>
   </body>
 </html>
+
+)=====";

@@ -1,3 +1,8 @@
+//=========================================
+//HTML + CSS + JavaScript codes for webpage
+//=========================================
+const char MQTT_PAGE[] =
+R"=====(
 <!DOCTYPE html>
 <html>
   <head>
@@ -63,7 +68,7 @@
       }
 
       .slider.round:before {
-        border-radius: 50%;
+        border-radius: 50%%;
       }
       .login-container {
         width: 300px;
@@ -80,11 +85,11 @@
         justify-content: center;
       }
       .form-group {
-        width: 100%;
+        width: 100%%;
         margin-bottom: 10px;
       }
       .form-control {
-        width: 100%;
+        width: 100%%;
         padding: 12px 20px;
         margin: 8px 0;
         box-sizing: border-box;
@@ -95,7 +100,7 @@
         border: 2px solid #555;
       }
       .form-submit {
-        width: 100%;
+        width: 100%%;
         background-color: #4caf50;
         color: white;
         padding: 14px 20px;
@@ -116,10 +121,57 @@
   </head>
   <body>
     <div class="login-container"  action='/login' method='POST'>
-      <h1 style="color:#45a049;text-align: center;">ALERT SYSTEM MODULE</h1>
-      <a href="/wifi"><button type="submit" class="form-submit">Konfigurasi WiFi</button></a>      
-      <a href="/ethernet"><button type="submit" class="form-submit">Konfigurasi Ethernet</button></a>      
-      <a href="/login"><button type="submit" class="form-submit">Logout</button></a>      
+        <h1 style="color:#45a049;text-align: center;">ALERT SYSTEM MODULE</h1>
+        <h3 style="text-align: center;">ID:ASM2301002</h3>
+      <form class="login-form">
+        <div class="form-group">
+          <label class="form-label" for="password">MQTT Broker</label>
+          <input
+            type="text"
+            name='BROKER_MQTT'
+            class="form-control"
+            id="ip_addr"
+            placeholder="Masukkan Alamat MQTT Broker"
+            value="%s"
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Port</label>
+          <input
+            type="text"
+            name='PORT'
+            class="form-control"
+            id="netmask"
+            placeholder="Masukkan Port"
+            value="%s"
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Username</label>
+          <input
+            type="text"
+            name='USERNAME'
+            class="form-control"
+            id="gateway"
+            placeholder="Masukkan Username"
+            value="%s"
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input
+            type="text"
+            name='PASSWORD'
+            class="form-control"
+            id="dns"
+            placeholder="Masukkan Password"
+            value="%s"
+          />
+        </div>
+        <button type="submit" name='SUBMIT' class="form-submit">Simpan</button>
+      </form>
+      <a href="/"><button type="submit" name='SUBMIT' class="form-submit">Kembali</button></a>      
     </div>
   </body>
 </html>
+)=====";
