@@ -37,8 +37,8 @@ char MQTTBuffer[5000];
 String pubTopic = "alert/device/";
 String subTopic = "alert/server/";
 
-#define MYPORT_TX D3
-#define MYPORT_RX D4
+#define MYPORT_TX 1
+#define MYPORT_RX 3
 SoftwareSerial Serial2;
 
 const char *ssid = STASSID;
@@ -49,11 +49,11 @@ String AREA = "1";
 String CURRENT_MODE = "NORMAL";
 
 byte
-    pin_led_1 = 4,
+    pin_led_1 = 0,
     pin_led_2 = 0,
     pin_led_3 = 2,
     pin_factory_reset = 5,
-    pin_selector = 3, // 0=Ethernet || 1=Wifi
+    pin_selector = 4, // 0=Ethernet || 1=Wifi
     val_led = 0,
     tick = 0,  // TICK SCHEDULER
     detik = 0, // DETIK
@@ -250,7 +250,7 @@ void reconnect()
         Serial.print("failed, rc=");
         Serial.print(client.state());
         Serial.println(" try again in 5 seconds");
-        if (ETH_MODE)
+        if (!ETH_MODE)
         {
           TIMEOUT_MQTT_ETH++;
           if (TIMEOUT_MQTT_ETH > 4)
@@ -917,6 +917,7 @@ void proses()
   // ============================================= PENGULANGAN 10ms ============================================= //
   if ((payload_svr.indexOf("{") > -1) && (payload_svr.indexOf("}") > -1))
   {
+    Serial2.println(payload_svr);
     const size_t capacity_mqtt_time = JSON_OBJECT_SIZE(9) + 40;
     DynamicJsonDocument doc_mqtt(capacity_mqtt_time);
     deserializeJson(doc_mqtt, payload_svr.c_str());
@@ -924,15 +925,35 @@ void proses()
     String DATA = doc_mqtt["DATA"];
     if (FUNC == "ALARM")
     {
-      if (DATA == "MODE1")
+      if (DATA == "MD1")
       {
         ALARM_MODE = 1;
         CURRENT_MODE = "MODE_1";
       }
-      else if (DATA == "MODE2")
+      else if (DATA == "MD2")
       {
         ALARM_MODE = 2;
         CURRENT_MODE = "MODE_2";
+      }
+      else if (DATA == "MD3")
+      {
+        ALARM_MODE = 2;
+        CURRENT_MODE = "MODE_3";
+      }
+      else if (DATA == "MD4")
+      {
+        ALARM_MODE = 2;
+        CURRENT_MODE = "MODE_4";
+      }
+      else if (DATA == "MD5")
+      {
+        ALARM_MODE = 2;
+        CURRENT_MODE = "MODE_5";
+      }
+      else if (DATA == "MD6")
+      {
+        ALARM_MODE = 2;
+        CURRENT_MODE = "MODE_6";
       }
     }
     else if (FUNC == "TRG")
@@ -1305,6 +1326,8 @@ void proses()
         Serial.println("[DEBUG],FACTORY RESET BEGIN ...");
         String DEFAULT_SSID = "LAUNDRY KURNIA";
         String DEFAULT_PASS = "HARTOYO130606";
+        // String DEFAULT_SSID = "Amoeba";
+        // String DEFAULT_PASS = "caca0506";
         EEPROM.write(ADDR_SSID_LENGTH, DEFAULT_SSID.length());
         SSID_LENGTH_ARR = EEPROM.read(ADDR_SSID_LENGTH);
         for (byte i = 0; i < SSID_LENGTH_ARR; i++)
@@ -1387,7 +1410,10 @@ void setup()
   // ============================================= INISIASI SERIAL ============================================= //
   EEPROM.begin(EEPROM_SIZE);
   Serial.begin(9600);
-  // Serial2.begin(115200, SWSERIAL_8N1, MYPORT_RX, MYPORT_TX, false);
+  Serial.println("=================== ALERT SYSTEM MODULE ===================");
+  Serial.println("Hardware Version : 1.0");
+  Serial.println("Software Version : 1.0");
+  // Serial2.begin(9600, SWSERIAL_8N1, MYPORT_RX, MYPORT_TX, false);
   pinMode(pin_led_1, OUTPUT);
   pinMode(pin_led_2, OUTPUT);
   pinMode(pin_led_3, OUTPUT);
@@ -1396,17 +1422,15 @@ void setup()
   pinMode(pin_factory_reset, INPUT_PULLUP);
   delay(500);
   byte result_sel = digitalRead(pin_selector);
-  if (result_sel == 0)
-  {
-    ETH_MODE = true;
-  }
-  else
-  {
-    ETH_MODE = false;
-  }
-  Serial.println("=================== ALERT SYSTEM MODULE ===================");
-  Serial.println("Hardware Version : 1.0");
-  Serial.println("Software Version : 1.0");
+  // if (result_sel == 0)
+  // {
+  //   ETH_MODE = true;
+  // }
+  // else
+  // {
+  //   ETH_MODE = false;
+  // }
+  ETH_MODE = false;
   Serial.println("");
   Serial.print("ID : ");
   Serial.println(ID);
@@ -1431,6 +1455,8 @@ void setup()
     delay(10000);
     // String DEFAULT_SSID = "Amoeba";
     // String DEFAULT_PASS = "caca0506";
+    // String DEFAULT_SSID = "Xperia XZ1";
+    // String DEFAULT_PASS = "jakal123";
     String DEFAULT_SSID = "LAUNDRY KURNIA";
     String DEFAULT_PASS = "HARTOYO130606";
     EEPROM.write(ADDR_SSID_LENGTH, DEFAULT_SSID.length());
@@ -1562,7 +1588,7 @@ void setup()
         EEPROM.write(ADDR_IP_ARR[1], IP_ARR[1]);
         EEPROM.commit();
       }
-      ipStr += "."+String(IP_ARR[1]);
+      ipStr += "." + String(IP_ARR[1]);
       break;
     case 2:
       if ((IP_ARR[2] > 240))
@@ -1571,7 +1597,7 @@ void setup()
         EEPROM.write(ADDR_IP_ARR[2], IP_ARR[2]);
         EEPROM.commit();
       }
-      ipStr += "."+String(IP_ARR[2]);
+      ipStr += "." + String(IP_ARR[2]);
       break;
     case 3:
       if ((IP_ARR[3] > 1000))
@@ -1580,7 +1606,7 @@ void setup()
         EEPROM.write(ADDR_IP_ARR[3], IP_ARR[3]);
         EEPROM.commit();
       }
-      ipStr += "."+String(IP_ARR[3]);
+      ipStr += "." + String(IP_ARR[3]);
       break;
     default:
       break;
@@ -1609,7 +1635,7 @@ void setup()
         NETMASK_ARR[1] = 255;
         EEPROM.write(ADDR_NETMASK_ARR[1], NETMASK_ARR[1]);
       }
-      nmStr += "."+String(NETMASK_ARR[1]);
+      nmStr += "." + String(NETMASK_ARR[1]);
       break;
     case 2:
       if ((NETMASK_ARR[2] != 255) || (NETMASK_ARR[2] != 0))
@@ -1618,7 +1644,7 @@ void setup()
         EEPROM.write(ADDR_NETMASK_ARR[2], NETMASK_ARR[2]);
         EEPROM.commit();
       }
-      nmStr += "."+String(NETMASK_ARR[2]);
+      nmStr += "." + String(NETMASK_ARR[2]);
       break;
     case 3:
       if (NETMASK_ARR[3] == 255)
@@ -1627,7 +1653,7 @@ void setup()
         EEPROM.write(ADDR_NETMASK_ARR[3], NETMASK_ARR[3]);
         EEPROM.commit();
       }
-      nmStr += "."+String(NETMASK_ARR[3]);
+      nmStr += "." + String(NETMASK_ARR[3]);
       break;
     default:
       break;
@@ -1656,7 +1682,7 @@ void setup()
         GATEWAY_ARR[1] = 168;
         EEPROM.write(ADDR_GATEWAY_ARR[1], GATEWAY_ARR[1]);
       }
-      gwStr += "."+String(GATEWAY_ARR[1]);
+      gwStr += "." + String(GATEWAY_ARR[1]);
       break;
     case 2:
       if (GATEWAY_ARR[2] == 255)
@@ -1665,7 +1691,7 @@ void setup()
         EEPROM.write(ADDR_GATEWAY_ARR[2], GATEWAY_ARR[2]);
         EEPROM.commit();
       }
-      gwStr += "."+String(GATEWAY_ARR[2]);
+      gwStr += "." + String(GATEWAY_ARR[2]);
       break;
     case 3:
       if (GATEWAY_ARR[3] == 255)
@@ -1674,7 +1700,7 @@ void setup()
         EEPROM.write(ADDR_GATEWAY_ARR[3], GATEWAY_ARR[3]);
         EEPROM.commit();
       }
-      gwStr += "."+String(GATEWAY_ARR[3]);
+      gwStr += "." + String(GATEWAY_ARR[3]);
       break;
     default:
       break;
@@ -1703,7 +1729,7 @@ void setup()
         DNS_ARR[1] = 168;
         EEPROM.write(ADDR_DNS_ARR[1], DNS_ARR[1]);
       }
-      dnsStr += "."+String(DNS_ARR[1]);
+      dnsStr += "." + String(DNS_ARR[1]);
       break;
     case 2:
       if (DNS_ARR[2] == 255)
@@ -1712,7 +1738,7 @@ void setup()
         EEPROM.write(ADDR_DNS_ARR[2], DNS_ARR[2]);
         EEPROM.commit();
       }
-      dnsStr += "."+String(DNS_ARR[2]);
+      dnsStr += "." + String(DNS_ARR[2]);
       break;
     case 3:
       if (DNS_ARR[3] == 255)
@@ -1721,7 +1747,7 @@ void setup()
         EEPROM.write(ADDR_DNS_ARR[3], DNS_ARR[3]);
         EEPROM.commit();
       }
-      dnsStr += "."+String(DNS_ARR[3]);
+      dnsStr += "." + String(DNS_ARR[3]);
       break;
     default:
       break;
@@ -1742,8 +1768,8 @@ void setup()
   String mqtt_user = "admin";
   String mqtt_pass = "admin";
 
-  sprintf(WIFIBuffer,WIFI_MENU,ssid,password,ipStr.c_str(),nmStr.c_str(),gwStr.c_str(),dnsStr.c_str());
-  sprintf(MQTTBuffer,MQTT_PAGE,broker_ip.c_str(),mqtt_port.c_str(),mqtt_user.c_str(),mqtt_pass.c_str());
+  sprintf(WIFIBuffer, WIFI_MENU, ssid, password, ipStr.c_str(), nmStr.c_str(), gwStr.c_str(), dnsStr.c_str());
+  sprintf(MQTTBuffer, MQTT_PAGE, broker_ip.c_str(), mqtt_port.c_str(), mqtt_user.c_str(), mqtt_pass.c_str());
 
   SPI.begin();
   SPI.setBitOrder(MSBFIRST);
@@ -1858,7 +1884,6 @@ void setup()
   wifiServer.collectHeaders("User-Agent", "Cookie");
   wifiServer.begin();
   Serial.println("HTTP server started");
-
   WIFI_ON_SETUP = false;
   // ========================================== AKHIR INISIASI SERIAL ========================================== //
 
